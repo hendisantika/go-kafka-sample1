@@ -7,6 +7,7 @@ import (
 	"github.com/IBM/sarama"
 	"github.com/gin-gonic/gin"
 	"go-kafka-sample1/pkg/models"
+	"net/http"
 	"strconv"
 )
 
@@ -70,4 +71,37 @@ func sendKafkaMessage(producer sarama.SyncProducer,
 
 	_, _, err = producer.SendMessage(msg)
 	return err
+}
+
+func sendMessageHandler(producer sarama.SyncProducer,
+	users []models.User) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		fromID, err := getIDFromRequest("fromID", ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
+		}
+
+		toID, err := getIDFromRequest("toID", ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+			return
+		}
+
+		err = sendKafkaMessage(producer, users, ctx, fromID, toID)
+		if errors.Is(err, ErrUserNotFoundInProducer) {
+			ctx.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+			return
+		}
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "Notification sent successfully!",
+		})
+	}
 }
