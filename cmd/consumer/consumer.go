@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/IBM/sarama"
 	"github.com/gin-gonic/gin"
 	"go-kafka-sample1/pkg/models"
+	"log"
 	"sync"
 )
 
@@ -54,3 +56,19 @@ type Consumer struct {
 
 func (*Consumer) Setup(sarama.ConsumerGroupSession) error   { return nil }
 func (*Consumer) Cleanup(sarama.ConsumerGroupSession) error { return nil }
+
+func (consumer *Consumer) ConsumeClaim(
+	sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	for msg := range claim.Messages() {
+		userID := string(msg.Key)
+		var notification models.Notification
+		err := json.Unmarshal(msg.Value, &notification)
+		if err != nil {
+			log.Printf("failed to unmarshal notification: %v", err)
+			continue
+		}
+		consumer.store.Add(userID, notification)
+		sess.MarkMessage(msg, "")
+	}
+	return nil
+}
