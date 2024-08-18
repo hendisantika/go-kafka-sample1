@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/IBM/sarama"
 	"github.com/gin-gonic/gin"
 	"go-kafka-sample1/pkg/models"
@@ -71,4 +72,16 @@ func (consumer *Consumer) ConsumeClaim(
 		sess.MarkMessage(msg, "")
 	}
 	return nil
+}
+
+func initializeConsumerGroup() (sarama.ConsumerGroup, error) {
+	config := sarama.NewConfig()
+
+	consumerGroup, err := sarama.NewConsumerGroup(
+		[]string{KafkaServerAddress}, ConsumerGroup, config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize consumer group: %w", err)
+	}
+
+	return consumerGroup, nil
 }
