@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/IBM/sarama"
 	"github.com/gin-gonic/gin"
 	"go-kafka-sample1/pkg/models"
 	"sync"
@@ -45,3 +46,11 @@ func (ns *NotificationStore) Get(userID string) []models.Notification {
 	defer ns.mu.RUnlock()
 	return ns.data[userID]
 }
+
+// ============== KAFKA RELATED FUNCTIONS ==============
+type Consumer struct {
+	store *NotificationStore
+}
+
+func (*Consumer) Setup(sarama.ConsumerGroupSession) error   { return nil }
+func (*Consumer) Cleanup(sarama.ConsumerGroupSession) error { return nil }
