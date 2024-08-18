@@ -1,6 +1,9 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"github.com/gin-gonic/gin"
+)
 
 const (
 	ConsumerGroup      = "notifications-group"
@@ -11,3 +14,11 @@ const (
 
 // ============== HELPER FUNCTIONS ==============
 var ErrNoMessagesFound = errors.New("no messages found")
+
+func getUserIDFromRequest(ctx *gin.Context) (string, error) {
+	userID := ctx.Param("userID")
+	if userID == "" {
+		return "", ErrNoMessagesFound
+	}
+	return userID, nil
+}
