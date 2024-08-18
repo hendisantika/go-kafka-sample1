@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"go-kafka-sample1/pkg/models"
+	"sync"
 )
 
 const (
@@ -21,4 +23,12 @@ func getUserIDFromRequest(ctx *gin.Context) (string, error) {
 		return "", ErrNoMessagesFound
 	}
 	return userID, nil
+}
+
+// ====== NOTIFICATION STORAGE ======
+type UserNotifications map[string][]models.Notification
+
+type NotificationStore struct {
+	data UserNotifications
+	mu   sync.RWMutex
 }
