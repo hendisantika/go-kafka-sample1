@@ -32,3 +32,10 @@ type NotificationStore struct {
 	data UserNotifications
 	mu   sync.RWMutex
 }
+
+func (ns *NotificationStore) Add(userID string,
+	notification models.Notification) {
+	ns.mu.Lock()
+	defer ns.mu.Unlock()
+	ns.data[userID] = append(ns.data[userID], notification)
+}
