@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-kafka-sample1/pkg/models"
 	"log"
+	"net/http"
 	"sync"
 )
 
@@ -107,4 +108,24 @@ func setupConsumerGroup(ctx context.Context, store *NotificationStore) {
 			return
 		}
 	}
+}
+
+func handleNotifications(ctx *gin.Context, store *NotificationStore) {
+	userID, err := getUserIDFromRequest(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+
+	notes := store.Get(userID)
+	if len(notes) == 0 {
+		ctx.JSON(http.StatusOK,
+			gin.H{
+				"message":       "No notifications found for user",
+				"notifications": []models.Notification{},
+			})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"notifications": notes})
 }
