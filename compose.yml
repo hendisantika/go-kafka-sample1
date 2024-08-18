@@ -26,10 +26,10 @@ services:
       - --advertise-pandaproxy-addr
       - localhost:8082
     ports:
-      - 8081:8081
-      - 8082:8082
-      - 9092:9092
-      - 29092:29092
+      - "8081:8081"
+      - "8082:8082"
+      - "9092:9092"
+      - "29092:29092"
 
   console:
     image: docker.redpanda.com/vectorized/console:master-173596f
